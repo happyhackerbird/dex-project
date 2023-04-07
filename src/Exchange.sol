@@ -50,13 +50,36 @@ contract Exchange is ERC20 {
                 "The amount of sent tokens does not cover the minimum amount required to maintain the ratio"
             );
             require(token.transferFrom(msg.sender, address(this), tokenAmount));
-            // determine new LP tokens to be minted by formula:
+            // determine new LP tokens to be minted by ratio:
             // new LP / total LP = eth sent / eth reserve
             newLiquidity = (msg.value * getTotalLiquidity()) / ethReserve;
             _mint(msg.sender, newLiquidity);
             emit AddLiquidity(msg.sender, msg.value, tokenAmount);
             emit Transfer(address(0), msg.sender, newLiquidity);
         }
+    }
+
+    function removeLiquidity(
+        uint256 _amount
+    ) public returns (uint256 ethAmount, uint256 tokenAmount) {
+        // other checks are not necessary here
+        // because of _amount <= getLiquidity(msg.sender) <= getTotalLiquidity() and the first invariant will be checked by the _burn function
+        require(_amount > 0, "Amount must be greater than Zero");
+        uint256 totalLiquidity = getTotalLiquidity();
+        require(totalLiquidity > 0, "No liquidity to remove");
+        // the amount of respective tokens to be sent to the user is determined by the ratio:
+        // amount of tokens to be sent / token reserve = liquidity to be removed / total liquidity
+        ethAmount = (getEthReserve() * _amount) / totalLiquidity;
+        tokenAmount = (getTokenReserve() * _amount) / totalLiquidity;
+        (bool sent, ) = payable(msg.sender).call{value: ethAmount}("");
+        require(sent, "Transfer of assets failed"); // these would also revert if more than the total available liquidity is specified
+        require(
+            token.transfer(msg.sender, tokenAmount),
+            "Transfer of assets failed"
+        );
+        _burn(msg.sender, _amount); // this will revert if the specified liquidity is more than the user owns
+        emit RemoveLiquidity(msg.sender, ethAmount, tokenAmount);
+        emit Transfer(msg.sender, address(0), _amount);
     }
 
     function getEthReserve() public view returns (uint256) {
