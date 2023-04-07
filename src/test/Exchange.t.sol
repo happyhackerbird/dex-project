@@ -88,12 +88,15 @@ contract ExchangeTest is BaseSetup {
         dex.removeLiquidity(2001);
     }
 
+    // TODO would this even happen, 0 LP, with xy=k
     function test_revert_removeLiquidty_ZeroTotalSupply() public {
         dex.removeLiquidity(1000);
         assertEq(dex.getTotalLiquidity(), 0);
         vm.expectRevert("No liquidity to remove");
         dex.removeLiquidity(1);
     }
+
+    function test_price() public {}
 
     fallback() external payable {}
 

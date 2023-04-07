@@ -82,6 +82,20 @@ contract Exchange is ERC20 {
         emit Transfer(msg.sender, address(0), _amount);
     }
 
+    function price(
+        uint256 _inAmount,
+        uint256 _inReserve,
+        uint256 _outReserve
+    ) public pure returns (uint256 outAmount) {
+        require(_inReserve > 0, "Insufficient input reserve");
+        // constant product formula
+        // (x + Δx) * (y - Δy) = x * y ==> Δy = x * y / (x + Δx) - y
+        uint256 inAmountWithFee = _inAmount * 997; // 0.3% fee
+        uint256 numerator = inAmountWithFee * _outReserve;
+        uint256 denominator = (_inReserve * 1000) + inAmountWithFee;
+        outAmount = numerator / denominator;
+    }
+
     function getEthReserve() public view returns (uint256) {
         return address(this).balance;
     }
