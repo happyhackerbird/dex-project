@@ -34,6 +34,7 @@ contract Exchange is ERC20 {
         uint256 tokenAmount;
 
         if (getTotalLiquidity() == 0) {
+            require(address(token) != address(0), "Invalid Token Contract");
             // the first person to deposit liquidity can use an arbitrary ratio and set a price
             tokenAmount = _maxAmount;
             newLiquidity = ethBalance;

@@ -31,6 +31,13 @@ contract ExchangeTest is BaseSetup {
         assertEq(dex.getLiquidity(deployer), 1000);
     }
 
+    function test_revert_InvalidTokenAddress() public {
+        address invalidToken = address(0);
+        Exchange e = new Exchange(invalidToken);
+        vm.expectRevert("Invalid Token Contract");
+        e.addLiquidity{value: 10}(10);
+    }
+
     function test_addLiquidity() public {
         vm.expectEmit(true, false, false, true);
         emit AddLiquidity(user1, 1000, 1000);
