@@ -3,11 +3,12 @@ pragma solidity >=0.8.0;
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {Utilities} from "./utils/Utilities.sol";
+import {StdAssertions} from "lib/openzeppelin-contracts/lib/forge-std/src/StdAssertions.sol";
 
 import {Exchange} from "../Exchange.sol";
 import {MyToken} from "../MyToken.sol";
 
-contract BaseSetup is DSTest {
+contract BaseSetup is DSTest, StdAssertions {
     Vm internal immutable vm = Vm(HEVM_ADDRESS);
     Utilities internal utils;
     address payable[] internal users;

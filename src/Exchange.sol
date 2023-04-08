@@ -27,6 +27,7 @@ contract Exchange is ERC20 {
     function addLiquidity(
         uint256 _maxAmount
     ) public payable returns (uint256 newLiquidity) {
+        require(_maxAmount > 0, "Amount must be greater than Zero");
         // the supply of LP token by the contract
         uint256 ethBalance = getEthReserve();
         // amount of tokens that are transferred to the contract
@@ -94,6 +95,29 @@ contract Exchange is ERC20 {
         uint256 numerator = inAmountWithFee * _outReserve;
         uint256 denominator = (_inReserve * 1000) + inAmountWithFee;
         outAmount = numerator / denominator;
+    }
+
+    function tokenToEth(uint256 _tokens, uint256 _minOutput) public {
+        uint256 ethBought = price(_tokens, getTokenReserve(), getEthReserve());
+        require(ethBought >= _minOutput, "Output amount not enough");
+        token.transferFrom(msg.sender, address(this), _tokens);
+        (bool sent, ) = msg.sender.call{value: ethBought}("");
+        require(sent, "Transfer of assets failed");
+        emit BuyEth(msg.sender, ethBought, _tokens);
+    }
+
+    function ethToToken(uint256 _minOutput) public payable {
+        uint256 tokensBought = price(
+            msg.value,
+            getEthReserve() - msg.value,
+            getTokenReserve()
+        );
+        require(tokensBought >= _minOutput, "Output amount not enough");
+        require(
+            token.transfer(msg.sender, tokensBought),
+            "Transfer of assets failed"
+        );
+        emit BuyToken(msg.sender, msg.value, tokensBought);
     }
 
     function getEthReserve() public view returns (uint256) {
