@@ -24,6 +24,7 @@ contract Exchange is ERC20 {
         token = IERC20(token_addr);
     }
 
+    // -------------------------------------------- Liquidity Functions ----------------------------------------------
     function addLiquidity(
         uint256 _maxAmount
     ) public payable returns (uint256 newLiquidity) {
@@ -84,6 +85,7 @@ contract Exchange is ERC20 {
         emit Transfer(msg.sender, address(0), _amount);
     }
 
+    // --------------------------------------- Exchange Functions ---------------------------------------------------------
     function price(
         uint256 _inAmount,
         uint256 _inReserve,
@@ -121,6 +123,7 @@ contract Exchange is ERC20 {
         emit BuyToken(msg.sender, msg.value, tokensBought);
     }
 
+    // -------------------------------------------------- Helpers ----------------------------------------------
     function getEthReserve() public view returns (uint256) {
         return address(this).balance;
     }

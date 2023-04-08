@@ -217,11 +217,6 @@ contract ExchangeTest is BaseSetup {
         dex.ethToToken{value: 100}(100);
     }
 
-    function test_revert_tokenToEth_InsufficientOutput() public {
-        vm.expectRevert("Output amount not enough");
-        dex.tokenToEth(100, 100);
-    }
-
     function test_tokenToEth() public {
         vm.expectEmit(true, true, true, true);
         emit BuyEth(deployer, 90, 100);
@@ -235,6 +230,31 @@ contract ExchangeTest is BaseSetup {
         assertEq(dex.getTokenReserve(), 1100);
         assertApproxEqAbs(address(deployer).balance, oldEthUser + 90, 1);
         assertApproxEqAbs(token.balanceOf(deployer), oldTokenUser - 100, 1);
+    }
+
+    function test_revert_tokenToEth_InsufficientOutput() public {
+        vm.expectRevert("Output amount not enough");
+        dex.tokenToEth(100, 100);
+    }
+
+    function test_SwapWithSlippage() public {
+        // quick demonstration of slippage
+        // the higher the traded amount in proportion to reserves, the higher the slippage (ie the less output amount)
+        // just get all the funds here
+        vm.deal(deployer, 25_000);
+        vm.prank(user1);
+        token.transfer(deployer, 5000);
+        vm.prank(user2);
+        token.transfer(deployer, 5000);
+        dex.addLiquidity{value: 14_000}(14_000);
+        // Reserves in pool: 15_000 ETH, 15_000 Tokens
+        // Traded amount: 10_000 ETH
+        uint amount = 10_000;
+        uint256 output = price(amount, 15_000, 15_000);
+        console.log("Output amount: ", output);
+        dex.ethToToken{value: amount}(output);
+        uint withSlippage = (output * 1000) / amount;
+        assertApproxEqRel(withSlippage, 1000, 0.60e18); // this means that the output (with slippage) is within 60% of the original amount
     }
 
     function price(
