@@ -247,14 +247,42 @@ contract ExchangeTest is BaseSetup {
         vm.prank(user2);
         token.transfer(deployer, 5000);
         dex.addLiquidity{value: 14_000}(14_000);
-        // Reserves in pool: 15_000 ETH, 15_000 Tokens
-        // Traded amount: 10_000 ETH
+        // ====> Reserves in pool: 15_000 ETH, 15_000 Tokens
+        // ====> Traded amount: 10_000 ETH
         uint amount = 10_000;
         uint256 output = price(amount, 15_000, 15_000);
         console.log("Output amount: ", output);
         dex.ethToToken{value: amount}(output);
         uint withSlippage = (output * 1000) / amount;
         assertApproxEqRel(withSlippage, 1000, 0.60e18); // this means that the output (with slippage) is within 60% of the original amount
+    }
+
+    function test_DemoOfLPToken() public {
+        // mint new LP tokens
+        dex.addLiquidity{value: 1000}(1000);
+        vm.prank(user1);
+        dex.addLiquidity{value: 3000}(3000);
+        vm.prank(user2);
+        dex.addLiquidity{value: 1000}(1000);
+        // ====> LP tokens ratio: 1:2:3 (user2: deployer: user1)
+
+        uint deployerEth = address(this).balance;
+        uint deployerToken = token.balanceOf(address(this));
+        uint user1Eth = address(user1).balance;
+        uint user1Token = token.balanceOf(user1);
+        uint user2Eth = address(user2).balance;
+        uint user2Token = token.balanceOf(user2);
+
+        // do some trades & collect fees
+        dex.ethToToken{value: 2000}(1400);
+        vm.prank(user1);
+        dex.tokenToEth(3000, 2700);
+        vm.prank(user2);
+        dex.ethToToken{value: 1000}(900);
+
+        // exchange LP token for liquidity and fees
+        dex.removeLiquidity(2000);
+        // TODO
     }
 
     function price(
