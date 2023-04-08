@@ -1,46 +1,23 @@
-# Forge Template
+# Uniswap V1 Dex Project
 
-A template for quickly getting started with forge
+Uniswap V1 clone built from scratch. Made to learn uniswap + foundry.
 
-## Getting Started
+To run all the tests (ensure you have foundry installed, see https://book.getfoundry.sh/getting-started/installation):
 
 ```
-mkdir my-project
-cd my-project
-forge init --template https://github.com/FrankieIsLost/forge-template
-git submodule update --init --recursive  ## initialize submodule dependencies
-npm install ## install development dependencies
-forge build
+git clone https://github.com/technocolour/dex-project.git
+cd dex-project
+git submodule update --init --recursive
+forge install OpenZeppelin/openzeppelin-contracts
 forge test
 ```
 
-## Features
+Missing: Factory contract. Continued with V2 :)
 
-### Testing Utilities
+---
 
-Includes a `Utilities.sol` contract with common testing methods (like creating users with an initial balance), as well as various other utility contracts.
+Sepolia:
 
-### Preinstalled dependencies
+Token: 0x666b804158b8009789437Da8B0BdAED058c38c57
 
-`ds-test` for testing, `forge-std` for better cheatcode UX, and `solmate` for optimized contract implementations.  
-
-### Linting
-
-Pre-configured `solhint` and `prettier-plugin-solidity`. Can be run by
-
-```
-npm run solhint
-npm run prettier
-```
-
-### CI with Github Actions
-
-Automatically run linting and tests on pull requests.
-
-### Default Configuration
-
-Including `.gitignore`, `.vscode`, `remappings.txt`
-
-## Acknowledgement
-
-Inspired by great dapptools templates like https://github.com/gakonst/forge-template, https://github.com/gakonst/dapptools-template and https://github.com/transmissions11/dapptools-template
+Exchange: 0x1C7fE82E9143780e7FC4b2e0e2e1262067AD26F6
