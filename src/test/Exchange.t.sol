@@ -105,12 +105,21 @@ contract ExchangeTest is BaseSetup {
         dex.removeLiquidity(2001);
     }
 
-    // TODO would this even happen, 0 LP, with xy=k
-    function test_revert_removeLiquidty_ZeroTotalSupply() public {
-        dex.removeLiquidity(1000);
+    function test_revert_removeLiquidity_ZeroTotalSupply() public {
+        // CASE 1
+        // this can happen despite mathematically infinite reserves (xy=k)
+        // because we don't check whether any liquidity removed is the last one
+        dex.removeLiquidity(1000); //
         assertEq(dex.getTotalLiquidity(), 0);
         vm.expectRevert("No liquidity to remove");
         dex.removeLiquidity(1);
+
+        // CASE 2
+        // when trying to remove liquidity from uninitialized DEX
+        MyToken t = new MyToken(10);
+        Exchange e = new Exchange(address(t));
+        vm.expectRevert("No liquidity to remove");
+        e.removeLiquidity(1);
     }
 
     function test_price() public {
@@ -201,6 +210,16 @@ contract ExchangeTest is BaseSetup {
         assertEq(dex.getTokenReserve(), 910);
         assertApproxEqAbs(address(deployer).balance, oldEthUser - 100, 1);
         assertApproxEqAbs(token.balanceOf(deployer), oldTokenUser + 90, 1);
+    }
+
+    function test_revert_ethToToken_InsufficientOutput() public {
+        vm.expectRevert("Output amount not enough");
+        dex.ethToToken{value: 100}(100);
+    }
+
+    function test_revert_tokenToEth_InsufficientOutput() public {
+        vm.expectRevert("Output amount not enough");
+        dex.tokenToEth(100, 100);
     }
 
     function test_tokenToEth() public {
