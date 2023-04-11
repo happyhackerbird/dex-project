@@ -8,7 +8,7 @@ import {StdAssertions} from "lib/openzeppelin-contracts/lib/forge-std/src/StdAss
 import {Exchange} from "../Exchange.sol";
 import {MyToken} from "../MyToken.sol";
 
-contract BaseSetup is DSTest, StdAssertions {
+abstract contract BaseSetup is DSTest, StdAssertions {
     Vm internal immutable vm = Vm(HEVM_ADDRESS);
     Utilities internal utils;
     address payable[] internal users;
@@ -30,10 +30,10 @@ contract BaseSetup is DSTest, StdAssertions {
         vm.label(user2, "Bob");
         deployer = address(this);
 
-        token = new MyToken(15000);
+        token = new MyToken(16000);
         dex = new Exchange(address(token));
 
-        token.transfer(user1, 5000 ether);
+        token.transfer(user1, 6000 ether);
         token.transfer(user2, 5000 ether);
         token.transfer(deployer, 5000 ether);
         vm.deal(user1, 5000 ether);
